@@ -17,7 +17,7 @@ setup(
     version="3.1.1",
     description="Time-Accurate Automatic Speech Recognition using Whisper.",
     readme="README.md",
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     author="Max Bain",
     url="https://github.com/m-bain/whisperx",
     license="MIT",
@@ -27,7 +27,7 @@ setup(
         for r in pkg_resources.parse_requirements(
             open(os.path.join(os.path.dirname(__file__), "requirements.txt"))
         )
-    ]
+    ],
     entry_points={
         "console_scripts": ["whisperx=whisperx.transcribe:cli"],
     },
