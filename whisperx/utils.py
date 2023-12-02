@@ -203,18 +203,13 @@ class ResultWriter:
 
         with open(output_path, "w", encoding="utf-8") as f:
             self.write_result(result, file=f, options=options)
-
+        
+        return os.path.join(
+            self.output_dir, audio_basename + "." + self.extension
+        )
+        
     def write_result(self, result: dict, file: TextIO, options: dict):
         raise NotImplementedError
-
-
-class WriteTXT(ResultWriter):
-    extension: str = "txt"
-
-    def write_result(self, result: dict, file: TextIO, options: dict):
-        for segment in result["segments"]:
-            print(segment["text"].strip(), file=file, flush=True)
-
 
 class SubtitlesWriter(ResultWriter):
     always_include_hours: bool
@@ -329,6 +324,13 @@ class SubtitlesWriter(ResultWriter):
             decimal_marker=self.decimal_marker,
         )
 
+class WriteTXT(ResultWriter):
+    extension: str = "txt"
+
+    def write_result(self, result: dict, file: TextIO, options: dict):
+        for segment in result["segments"]:
+            print(segment["text"].strip(), file=file, flush=True)
+
 
 class WriteVTT(SubtitlesWriter):
     extension: str = "vtt"
@@ -340,7 +342,6 @@ class WriteVTT(SubtitlesWriter):
         for start, end, text in self.iterate_result(result, options):
             print(f"{start} --> {end}\n{text}\n", file=file, flush=True)
 
-
 class WriteSRT(SubtitlesWriter):
     extension: str = "srt"
     always_include_hours: bool = True
@@ -351,7 +352,6 @@ class WriteSRT(SubtitlesWriter):
             self.iterate_result(result, options), start=1
         ):
             print(f"{i}\n{start} --> {end}\n{text}\n", file=file, flush=True)
-
 
 class WriteTSV(ResultWriter):
     """
@@ -371,7 +371,7 @@ class WriteTSV(ResultWriter):
             print(round(1000 * segment["start"]), file=file, end="\t")
             print(round(1000 * segment["end"]), file=file, end="\t")
             print(segment["text"].strip().replace("\t", " "), file=file, flush=True)
-
+    
 class WriteAudacity(ResultWriter):
     """
     Write a transcript to a text file that audacity can import as labels.
@@ -404,7 +404,7 @@ class WriteJSON(ResultWriter):
 
 def get_writer(
     output_format: str, output_dir: str
-) -> Callable[[dict, TextIO, dict], None]:
+) -> Callable[[dict, TextIO, dict], str | list[str]]:
     writers = {
         "txt": WriteTXT,
         "vtt": WriteVTT,
@@ -418,11 +418,13 @@ def get_writer(
 
     if output_format == "all":
         all_writers = [writer(output_dir) for writer in writers.values()]
-
+        
         def write_all(result: dict, file: TextIO, options: dict):
+            paths = []
             for writer in all_writers:
-                writer(result, file, options)
-
+                paths += writer(result, file, options)
+            return paths
+        
         return write_all
 
     if output_format in optional_writers:
