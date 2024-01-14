@@ -307,7 +307,7 @@ def load_model(whisper_arch,
         "temperatures": [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
         "compression_ratio_threshold": 2.4,
         "log_prob_threshold": -1.0,
-        "no_speech_threshold": 0.6,
+        "no_speech_threshold": 0.7,
         "condition_on_previous_text": False,
         "prompt_reset_on_temperature": 0.5,
         "initial_prompt": None,
@@ -321,7 +321,7 @@ def load_model(whisper_arch,
         "append_punctuations": "\"'.。,，!！?？:：”)]}、",
         "suppress_numerals": False,
     }
-
+#"no_speech_threshold": 0.7
     if asr_options is not None:
         default_asr_options.update(asr_options)
 
@@ -331,10 +331,10 @@ def load_model(whisper_arch,
     default_asr_options = faster_whisper.transcribe.TranscriptionOptions(**default_asr_options)
 
     default_vad_options = {
-        "vad_onset": 0.500,
-        "vad_offset": 0.363
+        "vad_onset": 0.100,
+        "vad_offset": 0.050
     }
-
+#"vad_onset": 0.500, "vad_offset": 0.500
     if vad_options is not None:
         default_vad_options.update(vad_options)
 
